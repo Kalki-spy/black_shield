@@ -1,0 +1,12 @@
+{
+  "rewrites":[
+    {
+      "source":"/api/:path*",
+      "destination":"https://blackshieldv2.onrender.com/api/:path*"
+    },
+    {
+      "source":"/health",
+      "destination":"https://blackshieldv2.onrender.com/health"
+    }
+  ]
+}
