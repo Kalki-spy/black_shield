@@ -16,6 +16,7 @@ Endpoints:
     POST /network/whois                     - WHOIS query (body: host)
     POST /network/sweep                     - host discovery sweep (body: cidr)
     POST /network/analyze                   - full multi-step analysis (body: host)
+    GET  /network/analyze?host=...          - full multi-step analysis (query param)
 """
 
 import socket
@@ -29,7 +30,7 @@ import ipaddress
 import re
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 import os
 PORT = int(os.environ.get("PORT", 5018))
@@ -388,6 +389,17 @@ class NetworkHandler(BaseHTTPRequestHandler):
             self._json(200, arp_table())
             return
 
+        if parsed.path == "/network/analyze":
+            qs   = parse_qs(parsed.query)
+            host = qs.get("host", [""])[0].strip()
+            if not host:
+                self._json(400, {"error": "Missing query parameter: host"}); return
+            try:
+                self._json(200, full_analyze(host))
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+
         self._json(404, {"error": "Not found"})
 
     # ── POST ──────────────────────────────────────────────────────────────────
@@ -484,4 +496,5 @@ if __name__ == "__main__":
     print(f"  POST /network/whois          - WHOIS (host)")
     print(f"  POST /network/sweep          - host sweep (cidr, threads)")
     print(f"  POST /network/analyze        - full analysis (host)")
+    print(f"  GET  /network/analyze?host=  - full analysis (query param)")
     srv.serve_forever()
