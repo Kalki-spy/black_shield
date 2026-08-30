@@ -19,7 +19,10 @@ interface LiveData {
   top_ips:   { ip: string; count: number }[];
   top_ports: { port: number; count: number }[];
   protocols: Record<string, number>;
+  avg_latency_ms: number | null;
 }
+
+const SANDBOX_TARGET = { id: "internal-sandbox", label: "BlackShield Sandbox Node (internal, loopback-only)" };
 
 const ATTACK_TYPES = [
   { id: "syn_flood",  label: "SYN Flood",         color: "text-rose-400/80",    icon: "⚡" },
@@ -92,6 +95,7 @@ export default function DDOSSimulator() {
       fd.append("attack_type", attackType);
       fd.append("duration",    String(duration));
       fd.append("pps",         String(pps));
+      fd.append("target",      SANDBOX_TARGET.id);
       const r = await fetch(`${BACKEND}/ddos/simulate`, { method: "POST", body: fd });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
@@ -155,8 +159,31 @@ export default function DDOSSimulator() {
         </div>
       </div>
 
+      {/* Sandbox safety notice */}
+      <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+        <span className="text-base leading-none">🧪</span>
+        <div className="text-xs font-mono">
+          <span className="font-bold text-yellow-400">SANDBOX ENVIRONMENT</span>
+          <span className="text-muted-foreground"> — Testing is restricted to authorized training targets. </span>
+          <span className="text-muted-foreground">Safe Traffic Simulation — Sandbox Only.</span>
+        </div>
+      </div>
+
       {/* Config */}
       <div className="neon-card rounded-xl p-6 border border-slate-700/40 bg-slate-900/60 space-y-5">
+        <div>
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-2">Sandbox Target</p>
+          <select
+            value={SANDBOX_TARGET.id}
+            disabled
+            title="Only the designated sandbox target is available"
+            aria-label="Sandbox target"
+            className="bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground w-full focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            <option value={SANDBOX_TARGET.id}>{SANDBOX_TARGET.label}</option>
+          </select>
+        </div>
+
         <p className="text-[10px] font-mono text-rose-400/60 uppercase tracking-widest">// Attack Profile</p>
 
         <div className="grid grid-cols-4 gap-2">
@@ -235,12 +262,13 @@ export default function DDOSSimulator() {
       {/* Live stats */}
       {live && (
         <>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-3">
             {([
               ["Total Packets", totalPkts,              "text-foreground",  <Activity  className="h-4 w-4 text-muted-foreground" />],
               ["Unique IPs",    live.top_ips.length,    "text-blue-400",    <Globe     className="h-4 w-4 text-blue-400" />],
               ["Alerts",        alertCount, alertCount > 0 ? "text-rose-400/80" : "text-green-400", <ShieldAlert className="h-4 w-4" />],
               ["Status",        isRunning ? "LIVE" : "DONE", isRunning ? "text-rose-400/80" : "text-green-400", <Radio className="h-4 w-4" />],
+              ["Sandbox Latency", live.avg_latency_ms != null ? `${live.avg_latency_ms}ms` : "—", "text-yellow-400", <Zap className="h-4 w-4 text-yellow-400" />],
             ] as [string, string|number, string, JSX.Element][]).map(([label, val, cls, icon]) => (
               <div key={label} className="neon-card rounded-xl p-4 border border-border">
                 <div className="flex items-center justify-between mb-2">
