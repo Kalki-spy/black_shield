@@ -14,7 +14,9 @@ export default defineConfig({
       "/api/health":                   { target: "http://localhost:8000", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/health/, "/health") },
       "/api/firewall":                 { target: "http://localhost:8777", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/firewall/, "") },
       "/api/network/network/portscan": { target: "http://localhost:8775", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/network\/network\/portscan/, "/scan") },
-      "/api/network/analyze":  { target: "http://localhost:8776", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/network\/analyze/, "/analyze") },
+      "/api/network/analyze":  { target: "http://localhost:5018", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/network\/analyze/, "/network/analyze") },
+      "/api/gobuster":                 { target: "http://localhost:8767", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/gobuster/, "") },
+      "/api/sqlmap":                   { target: "http://localhost:8768", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/sqlmap/, "") },
       "/api/network/network": {
     target: "http://localhost:8775",
     changeOrigin: true,
