@@ -72,12 +72,6 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
-        info: {
-          DEFAULT: "hsl(var(--info))",
-          foreground: "hsl(var(--info-foreground))",
-        },
-        "muted-label": "hsl(var(--muted-label))",
-        faint: "hsl(var(--faint))",
       },
       borderRadius: {
         lg: "var(--radius)",
